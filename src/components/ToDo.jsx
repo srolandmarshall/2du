@@ -10,11 +10,13 @@ const ToDo = (props) => {
   const [createdOn] = useState(new Date());
 
   const createItem = (contents) => {
-    const newItem = {
-      contents: contents,
-      addedDate: new Date(),
-    };
-    setItems([...items, newItem]);
+    if (contents.length > 0) {
+      const newItem = {
+        contents: contents,
+        addedDate: new Date(),
+      };
+      setItems([...items, newItem]);
+    }
     toggleForm();
   };
 
@@ -36,7 +38,7 @@ const ToDo = (props) => {
                 <NewToDo createItem={createItem} toggleForm={toggleForm} />
               </>
             ) : (
-              <Button variant="primary" onClick={toggleForm}>
+              <Button className="add" variant="primary" onClick={toggleForm}>
                 Add To Do
               </Button>
             )}
