@@ -9,11 +9,11 @@ library.add(faCheck, faTimes);
 
 function App() {
   return (
-    <div className="App">
+    <div className="2du">
       <Container>
         <Row>
           <Col>
-            <ToDo title="Test!" />
+            <ToDo title="Amazon Test!" />
           </Col>
         </Row>
       </Container>
