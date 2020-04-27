@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Button, Card } from "react-bootstrap";
+import { ListGroup, Button, Card } from "react-bootstrap";
 import NewToDo from "./NewToDo";
+import ToDoList from "./ToDoList";
 
 const ToDo = (props) => {
   const [items, setItems] = useState([]);
@@ -29,11 +30,7 @@ const ToDo = (props) => {
         <Card.Body>
           <Card.Title>Created {createdOn.toLocaleDateString()}</Card.Title>
           <Card.Text>
-            <>
-              {items.map((item, index) => (
-                <li key={index}>{item.contents}</li>
-              ))}
-            </>
+            <ToDoList items={items} />
             {showForm ? (
               <>
                 <NewToDo createItem={createItem} toggleForm={toggleForm} />
