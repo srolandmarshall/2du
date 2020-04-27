@@ -1,20 +1,34 @@
 import React, { useState } from "react";
-import { InputGroup, ListGroup } from "react-bootstrap";
+import { Fade, ListGroup } from "react-bootstrap";
 
 const ToDoItem = (props) => {
   const [done, setDone] = useState(false);
   const { item, key, num } = props;
   const toggleItem = (params) => {
+    console.log(`Checked: ${done}`);
+
+    setDone(!done);
+  };
+
+  const testLabel = () => {
+    console.log("Label click");
     setDone(!done);
   };
 
   return (
-    <ListGroup.Item action onClick={toggleItem} key={key}>
-      <input type="checkbox" id={num} name={num} checked={done} />
-      <label class="form-check-label" for={num}>
-        {num}. {item.contents}
-      </label>
-    </ListGroup.Item>
+    <Fade appear={true} in={true}>
+      <ListGroup.Item onClick={toggleItem} action key={key}>
+        <input
+          type="checkbox"
+          id={`item-${num}`}
+          name={`item-${num}`}
+          checked={done}
+        />
+        <span className="label">
+          {num}. {item.contents}
+        </span>
+      </ListGroup.Item>
+    </Fade>
   );
 };
 
