@@ -9,7 +9,7 @@ library.add(faCheck, faTimes);
 
 function App() {
   return (
-    <div className="2du">
+    <div className="App">
       <Container>
         <Row>
           <Col>
