@@ -1,34 +1,30 @@
 import React, { useState } from "react";
-import { Fade, ListGroup } from "react-bootstrap";
 
 const ToDoItem = (props) => {
-  const [done, setDone] = useState(false);
-  const { item, key, num } = props;
-  const toggleItem = (params) => {
-    console.log(`Checked: ${done}`);
+  const { toggleItem, num } = props;
+  const [item, setItem] = useState(props.item);
 
-    setDone(!done);
-  };
-
-  const testLabel = () => {
-    console.log("Label click");
-    setDone(!done);
+  const handleChange = () => {
+    toggleItem(item.id);
+    const toggle = !item.done;
+    setItem({
+      ...item,
+      done: toggle,
+    });
   };
 
   return (
-    <Fade appear={true} in={true}>
-      <ListGroup.Item onClick={toggleItem} action key={key}>
-        <input
-          type="checkbox"
-          id={`item-${num}`}
-          name={`item-${num}`}
-          checked={done}
-        />
-        <span className="label">
-          {num}. {item.contents}
-        </span>
-      </ListGroup.Item>
-    </Fade>
+    <div key={item.key} class="to-do" onClick={handleChange}>
+      <input
+        key={item.key}
+        name={`checkbox-${item.id}`}
+        type="checkbox"
+        checked={item.done}
+      />
+      <span key={item.key} class="label" id={`checkbox-${item.id}-label`}>
+        {num}. {item.contents}
+      </span>
+    </div>
   );
 };
 
