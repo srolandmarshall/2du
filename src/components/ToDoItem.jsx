@@ -14,14 +14,15 @@ const ToDoItem = (props) => {
   };
 
   return (
-    <div key={item.key} class="to-do" onClick={handleChange}>
+    <div key={item.key} className="to-do" onClick={handleChange}>
       <input
         key={item.key}
         name={`checkbox-${item.id}`}
         type="checkbox"
         checked={item.done}
+        readOnly
       />
-      <span key={item.key} class="label" id={`checkbox-${item.id}-label`}>
+      <span key={item.key} className="label" id={`checkbox-${item.id}-label`}>
         {num}. {item.contents}
       </span>
     </div>

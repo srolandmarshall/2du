@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Row, Col, Button, Card, ListGroup, Fade } from "react-bootstrap";
 import NewToDo from "../components/NewToDo";
@@ -53,54 +53,51 @@ const ToDo = (props) => {
 
   const { title } = props;
   return (
-    <div>
-      <Card>
-        <Card.Header>{title}</Card.Header>
-        <Card.Body>
-          <Row>
-            <Col>
-              <p>Created {createdOn.toLocaleDateString()}</p>
-            </Col>
-            <Col>
-              <Button
-                onClick={removeCheckedItems}
-                size="sm"
-                variant="outline-primary"
-              >
-                Clear Checked Items
-              </Button>
-            </Col>
-          </Row>
-
-          <Card.Text>
-            <ListGroup variant="flush">
-              {items.map((item, index) => {
-                return (
-                  <Fade in={true}>
-                    <ToDoItem
-                      item={item}
-                      num={index + 1}
-                      id={item.id}
-                      key={`todo-item-${item.id}`}
-                      toggleItem={toggleItem}
-                    />
-                  </Fade>
-                );
-              })}
-            </ListGroup>
-            {showForm ? (
-              <>
-                <NewToDo createItem={createItem} toggleForm={toggleForm} />
-              </>
-            ) : (
-              <Button className="add" variant="primary" onClick={toggleForm}>
-                Add To Do
-              </Button>
-            )}
-          </Card.Text>
-        </Card.Body>
-      </Card>
-    </div>
+    <Card>
+      <Card.Header>{title}</Card.Header>
+      <Card.Body>
+        <Row>
+          <Col>
+            <h6>Created {createdOn.toLocaleDateString()}</h6>
+          </Col>
+          <Col>
+            <Button
+              onClick={removeCheckedItems}
+              size="sm"
+              variant="outline-primary"
+            >
+              Clear Checked Items
+            </Button>
+          </Col>
+        </Row>
+        <ListGroup variant="flush">
+          {items.map((item, index) => {
+            return (
+              <Fade key={`fade-${item.key}`} appear={true} in={true}>
+                <ListGroup.Item>
+                  <ToDoItem
+                    item={item}
+                    num={index + 1}
+                    id={item.id}
+                    key={`todo-item-${item.id}`}
+                    toggleItem={toggleItem}
+                  />
+                </ListGroup.Item>
+              </Fade>
+            );
+          })}
+        </ListGroup>
+        {showForm ? (
+          <>
+            <NewToDo createItem={createItem} toggleForm={toggleForm} />
+          </>
+        ) : (
+          <Button className="add" variant="primary" onClick={toggleForm}>
+            Add To Do
+          </Button>
+        )}
+      </Card.Body>
+    </Card>
   );
 };
 
