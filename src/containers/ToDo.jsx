@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Row, Col, Button, Card, ListGroup, Fade } from "react-bootstrap";
+import { Row, Col, Button, Card, ListGroup } from "react-bootstrap";
 import NewToDo from "../components/NewToDo";
 import ToDoItem from "../components/ToDoItem";
 
@@ -73,17 +73,15 @@ const ToDo = (props) => {
         <ListGroup variant="flush">
           {items.map((item, index) => {
             return (
-              <Fade key={`fade-${item.key}`} appear={true} in={true}>
-                <ListGroup.Item>
-                  <ToDoItem
-                    item={item}
-                    num={index + 1}
-                    id={item.id}
-                    key={`todo-item-${item.id}`}
-                    toggleItem={toggleItem}
-                  />
-                </ListGroup.Item>
-              </Fade>
+              <ListGroup.Item>
+                <ToDoItem
+                  item={item}
+                  num={index + 1}
+                  id={item.id}
+                  key={`todo-item-${item.id}`}
+                  toggleItem={toggleItem}
+                />
+              </ListGroup.Item>
             );
           })}
         </ListGroup>
