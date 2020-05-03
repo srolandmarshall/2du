@@ -7,7 +7,6 @@ import ToDoItem from "../components/ToDoItem";
 const ToDo = (props) => {
   const [items, setItems] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [createdOn] = useState(props.createdOn);
   const [itemId, setItemId] = useState(0);
 
   const createItem = (contents) => {
@@ -51,15 +50,16 @@ const ToDo = (props) => {
     setShowForm(!showForm);
   };
 
-  const { title } = props;
+  const { title, createdOn } = props;
   return (
     <Card>
       <Card.Header>{title}</Card.Header>
       <Card.Body>
         <Row>
           <Col>
-            <h6>Created {createdOn.toLocaleDateString()}</h6>
+            <h6>Created {new Date(createdOn).toLocaleString()}</h6>
           </Col>
+
           <Col>
             <Button
               onClick={removeCheckedItems}

@@ -4,24 +4,33 @@ import ToDo from "./ToDo.jsx";
 import NewToDoList from "../components/NewToDoList.jsx";
 
 const ToDos = () => {
-  const [ToDoList, setToDoList] = useState([]);
+  const [ToDoList, setToDoList] = useState(() => {
+    let toDos;
+    try {
+      toDos = JSON.parse(window.localStorage.getItem("2du:toDos") || []);
+    } catch (e) {
+      console.log("caught in useState");
+      toDos = [];
+    }
+    return toDos;
+  });
   const [showForm, setShowForm] = useState(false);
+  const [listId, setListId] = useState(0);
 
   const createToDo = (title) => {
     const newList = {
+      id: listId,
       title: title,
       createdOn: new Date(),
     };
     setToDoList([...ToDoList, newList]);
+    setListId(listId + 1);
     setShowForm(false);
   };
 
   useEffect(() => {
-    window.localStorage.setItem("toDos", ToDoList);
-    return (cleanUp = () => {});
+    window.localStorage.setItem("2du:toDos", JSON.stringify(ToDoList));
   }, [ToDoList]);
-
-  // https://www.youtube.com/watch?v=yu3dnHrnps4
 
   const toggleForm = () => {
     setShowForm(!showForm);
@@ -37,7 +46,9 @@ const ToDos = () => {
         <NewToDoList toggleForm={toggleForm} createToDo={createToDo} />
       )}
       {ToDoList.map((toDo) => {
-        return <ToDo createdOn={toDo.createdOn} title={toDo.title} />;
+        return (
+          <ToDo key={toDo.id} createdOn={toDo.createdOn} title={toDo.title} />
+        );
       })}
     </>
   );
