@@ -7,7 +7,7 @@ import ToDoItem from "../components/ToDoItem";
 const ToDo = (props) => {
   const [items, setItems] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [createdOn] = useState(new Date());
+  const [createdOn] = useState(props.createdOn);
   const [itemId, setItemId] = useState(0);
 
   const createItem = (contents) => {
