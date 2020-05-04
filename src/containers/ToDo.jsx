@@ -3,9 +3,10 @@ import PropTypes from "prop-types";
 import { Row, Col, Button, Card, ListGroup } from "react-bootstrap";
 import NewToDo from "../components/NewToDo";
 import ToDoItem from "../components/ToDoItem";
+import { useLocalStorage } from "../App.js";
 
 const ToDo = (props) => {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useLocalStorage(`2du:items-${props.listId}`, []);
   const [showForm, setShowForm] = useState(false);
   const [itemId, setItemId] = useState(0);
 
@@ -73,7 +74,7 @@ const ToDo = (props) => {
         <ListGroup variant="flush">
           {items.map((item, index) => {
             return (
-              <ListGroup.Item>
+              <ListGroup.Item key={index}>
                 <ToDoItem
                   item={item}
                   num={index + 1}
@@ -103,7 +104,6 @@ ToDo.propTypes = {
   title: PropTypes.string,
   numTasks: PropTypes.number,
   numCompleted: PropTypes.number,
-  createdOn: PropTypes.instanceOf(Date),
 };
 
 export default ToDo;
