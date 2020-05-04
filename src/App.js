@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Modal, Form, Container, Row, Col, Button } from "react-bootstrap";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import "./App.css";
 import ToDo from "./containers/ToDo.jsx";
 import NewToDoList from "./components/NewToDoList.jsx";
@@ -10,7 +13,7 @@ import Cookies from "js-cookie";
 const axios = require("axios").default;
 const queryString = require("query-string");
 
-library.add(faCheck, faTimes);
+library.add(faCheck, faTimes, faGithub);
 
 var FileSaver = require("file-saver");
 
@@ -50,7 +53,9 @@ function App() {
   const [ToDoList, setToDoList] = useLocalStorage("2du:toDos", []);
   const [tempToDoList, setTempToDoList] = useState([]);
   const [file, setFile] = useState({});
-  const [hasGithubToken, setHasGitHubToken] = useState(false);
+  const [hasGithubToken, setHasGitHubToken] = useState(
+    typeof Cookies.get("access_token") !== "undefined"
+  );
 
   const exportAllToJSON = () => {
     const json = JSON.stringify(localStorage);
@@ -227,13 +232,18 @@ function App() {
           })}
         </Row>
         <Row>
-          <a
-            href={`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=user&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}`}
-          >
-            Sign Into GitHub
-          </a>
+          {!hasGithubToken && (
+            <a
+              href={`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=user&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}`}
+            >
+              <Button variant="secondary">
+                <span className="padded">Log In with GitHub</span>
+                <FontAwesomeIcon icon={faGithub} />
+              </Button>
+            </a>
+          )}
         </Row>
-        <Row>{Cookies.get("access_token") && <p>Got your token!</p>}</Row>
+        <Row>{hasGithubToken && <p>Logged in with GitHub!</p>}</Row>
       </Container>
     </div>
   );
