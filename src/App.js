@@ -50,6 +50,7 @@ function App() {
   const [ToDoList, setToDoList] = useLocalStorage("2du:toDos", []);
   const [tempToDoList, setTempToDoList] = useState([]);
   const [file, setFile] = useState({});
+  const [hasGithubToken, setHasGitHubToken] = useState(false);
 
   const exportAllToJSON = () => {
     const json = JSON.stringify(localStorage);
@@ -61,7 +62,7 @@ function App() {
     const queries = window.location.search;
     const params = new URLSearchParams(queries);
     const code = params.get("code");
-    if (code) {
+    if (code && !hasGithubToken) {
       console.log(`Code ${code} present`);
       async function getToken() {
         try {
@@ -84,6 +85,7 @@ function App() {
             for (let [key, value] of Object.entries(parsed)) {
               Cookies.set(key, value);
             }
+            setHasGitHubToken(true);
           }
         } catch (error) {
           console.log(error);
@@ -91,7 +93,7 @@ function App() {
       }
       getToken();
     }
-  });
+  }, []);
 
   const createToDo = (title) => {
     const newList = {
@@ -228,9 +230,10 @@ function App() {
           <a
             href={`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=user&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}`}
           >
-            GitHub Test
+            Sign Into GitHub
           </a>
         </Row>
+        <Row>{Cookies.get("access_token") && <p>Got your token!</p>}</Row>
       </Container>
     </div>
   );
