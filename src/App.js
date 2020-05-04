@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Form, Container, Row, Col, Button } from "react-bootstrap";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 import ToDo from "./containers/ToDo.jsx";
 import NewToDoList from "./components/NewToDoList.jsx";
+import Cookies from "js-cookie";
+
+const axios = require("axios").default;
+const queryString = require("query-string");
 
 library.add(faCheck, faTimes);
 
@@ -52,6 +56,42 @@ function App() {
     var blob = new Blob([json], { type: "application/json;charset=utf-8" });
     FileSaver.saveAs(blob, "2du.json");
   };
+
+  useEffect(() => {
+    const queries = window.location.search;
+    const params = new URLSearchParams(queries);
+    const code = params.get("code");
+    if (code) {
+      console.log(`Code ${code} present`);
+      async function getToken() {
+        try {
+          const res = await axios.post(
+            `/oauth`,
+            {
+              client_id: process.env.REACT_APP_CLIENT_ID,
+              client_secret: process.env.REACT_APP_CLIENT_SECRET,
+              code: code,
+            },
+            { headers: { Accept: "application/json" } }
+          );
+          console.log("response below");
+          console.log(res);
+          console.log(res.data);
+          const parsed = queryString.parse(res.data);
+          if (parsed.error) {
+            throw "Bad OAuth Token";
+          } else {
+            for (let [key, value] of Object.entries(parsed)) {
+              Cookies.set(key, value);
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      getToken();
+    }
+  });
 
   const createToDo = (title) => {
     const newList = {
@@ -183,6 +223,13 @@ function App() {
               </Col>
             );
           })}
+        </Row>
+        <Row>
+          <a
+            href={`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=user&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}`}
+          >
+            GitHub Test
+          </a>
         </Row>
       </Container>
     </div>
