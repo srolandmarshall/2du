@@ -5,8 +5,11 @@ import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 import ToDos from "./containers/ToDos.jsx";
 import NewToDoList from "./components/NewToDoList.jsx";
+import { saveAs } from "file-saver";
 
 library.add(faCheck, faTimes);
+
+var FileSaver = require("file-saver");
 
 export function useLocalStorage(key, defaultValue) {
   const [storedValue, setStoredValue] = useState(() => {
@@ -41,6 +44,13 @@ function App() {
   const [showNewToDoForm, setShowNewToDoForm] = useState(false);
   const [listId, setListId] = useLocalStorage("2du:listId", 0);
   const [ToDoList, setToDoList] = useLocalStorage("2du:toDos", []);
+  const [file, setFile] = useState({});
+
+  const exportAllToJSON = () => {
+    const json = JSON.stringify(localStorage);
+    var blob = new Blob([json], { type: "application/json;charset=utf-8" });
+    FileSaver.saveAs(blob, "2du.json");
+  };
 
   const createToDo = (title) => {
     const newList = {
@@ -54,6 +64,33 @@ function App() {
     setShowNewToDoForm(false);
   };
 
+  const onUpload = (e) => {
+    console.log("Uploaded");
+    let saved = {};
+    try {
+      saved = e.target.files[0];
+    } catch (err) {
+      console.log(err);
+    }
+    setFile(saved);
+  };
+
+  const onSubmit = (e) => {
+    let reader = new FileReader();
+    reader.readAsText(file);
+    window.localStorage.clear();
+    reader.onload = function () {
+      const objectVersion = JSON.parse(reader.result);
+      for (let [key, value] of Object.entries(objectVersion)) {
+        window.localStorage.setItem(key, value);
+      }
+      setToDoList(JSON.parse(objectVersion["2du:toDos"]));
+    };
+    reader.onerror = function () {
+      console.log(reader.error);
+    };
+  };
+
   return (
     <div className="App">
       <Container>
@@ -63,7 +100,6 @@ function App() {
               New ToDo List
             </Button>
           </Col>
-
           {showNewToDoForm && (
             <NewToDoList
               createToDo={createToDo}
@@ -74,6 +110,17 @@ function App() {
         </Row>
         <Row>
           <ToDos toDoList={ToDoList} setListId={setListId} listId={listId} />
+        </Row>
+        <Row className="padded">
+          <Col>
+            <Button onClick={exportAllToJSON} variant="success">
+              Export to JSON
+            </Button>
+          </Col>
+          <Col>
+            <input type="file" onChange={onUpload} />
+            {file.name && <Button onClick={onSubmit}>Upload</Button>}
+          </Col>
         </Row>
       </Container>
     </div>
