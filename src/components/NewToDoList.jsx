@@ -31,7 +31,10 @@ const NewToDoList = (props) => {
         aria-describedby="new-to-do"
       />
       <InputGroup.Append>
-        <Button onClick={props.toggleForm} variant="outline-danger">
+        <Button
+          onClick={() => props.setShowNewToDoForm(false)}
+          variant="outline-danger"
+        >
           <FontAwesomeIcon icon="times" />
         </Button>
         <Button onClick={handleSubmit} variant="outline-success">

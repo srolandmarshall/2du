@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 import ToDos from "./containers/ToDos.jsx";
+import NewToDoList from "./components/NewToDoList.jsx";
 
 library.add(faCheck, faTimes);
 
@@ -37,15 +38,42 @@ export function useLocalStorage(key, defaultValue) {
 }
 
 function App() {
+  const [showNewToDoForm, setShowNewToDoForm] = useState(false);
   const [listId, setListId] = useLocalStorage("2du:listId", 0);
+  const [ToDoList, setToDoList] = useLocalStorage("2du:toDos", []);
+
+  const createToDo = (title) => {
+    const newList = {
+      listId: listId,
+      title: title,
+      createdOn: new Date(),
+      items: [],
+    };
+    setToDoList([...ToDoList, newList]);
+    setListId(listId + 1);
+    setShowNewToDoForm(false);
+  };
 
   return (
     <div className="App">
       <Container>
-        <Row>
+        <Row className="padded">
           <Col>
-            <ToDos setListId={setListId} listId={listId} />
+            <Button onClick={() => setShowNewToDoForm(true)}>
+              New ToDo List
+            </Button>
           </Col>
+
+          {showNewToDoForm && (
+            <NewToDoList
+              createToDo={createToDo}
+              showNewToDoForm={showNewToDoForm}
+              setShowNewToDoForm={setShowNewToDoForm}
+            />
+          )}
+        </Row>
+        <Row>
+          <ToDos toDoList={ToDoList} setListId={setListId} listId={listId} />
         </Row>
       </Container>
     </div>
