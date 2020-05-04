@@ -44,6 +44,7 @@ function App() {
   const [showClearModal, setShowClearModal] = useState(false);
   const [listId, setListId] = useLocalStorage("2du:listId", 0);
   const [ToDoList, setToDoList] = useLocalStorage("2du:toDos", []);
+  const [tempToDoList, setTempToDoList] = useState([]);
   const [file, setFile] = useState({});
 
   const exportAllToJSON = () => {
@@ -84,16 +85,24 @@ function App() {
       for (let [key, value] of Object.entries(objectVersion)) {
         window.localStorage.setItem(key, value);
       }
-      setToDoList(JSON.parse(objectVersion["2du:toDos"]));
+      const toDos = JSON.parse(objectVersion["2du:toDos"]);
+      if (ToDoList.length > 0) {
+        setShowClearModal(true);
+        setTempToDoList(toDos);
+      } else {
+        setToDoList(toDos);
+      }
     };
     reader.onerror = function () {
       console.log(reader.error);
     };
+    setFile({});
   };
 
-  const clearToDoList = () => {
+  const replaceToDoList = (list) => {
     setShowClearModal(false);
-    setToDoList([]);
+    setToDoList(tempToDoList);
+    setTempToDoList([]);
   };
   const handleClose = () => setShowClearModal(false);
 
@@ -109,7 +118,7 @@ function App() {
             <Button variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={clearToDoList}>
+            <Button variant="primary" onClick={() => replaceToDoList([])}>
               That's OK!
             </Button>
           </Modal.Footer>
@@ -141,7 +150,7 @@ function App() {
               <Col>
                 {file.name && (
                   <Button className="padded" onClick={onSubmit}>
-                    Upload
+                    Upload JSON
                   </Button>
                 )}
               </Col>
