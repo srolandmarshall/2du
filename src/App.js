@@ -111,9 +111,9 @@ function App() {
       <Container>
         <Modal show={showClearModal} onHide={handleClose}>
           <Modal.Header closeButton>
-            <Modal.Title>Clear To Dos?</Modal.Title>
+            <Modal.Title>Clear 2dus?</Modal.Title>
           </Modal.Header>
-          <Modal.Body>This will clear all of your current to dos.</Modal.Body>
+          <Modal.Body>This will clear all of your current 2dus.</Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClose}>
               Cancel
@@ -126,7 +126,7 @@ function App() {
         <Row className="padded">
           <Col className="padded" md={3}>
             <Button onClick={() => setShowNewToDoForm(true)}>
-              New ToDo List
+              New 2du List
             </Button>
           </Col>
           <Col className="padded" md={3}>
