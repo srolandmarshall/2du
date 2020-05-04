@@ -17,6 +17,10 @@
   padding: 10px;
 }
 
+.custom-file-label {
+  text-align: left;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

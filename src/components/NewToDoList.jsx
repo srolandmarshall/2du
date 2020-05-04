@@ -11,7 +11,7 @@ const NewToDoList = (props) => {
   };
 
   const handleSubmit = () => {
-    props.createToDo(content);
+    if (content.length > 0) props.createToDo(content);
   };
 
   const handleKeyPress = (e) => {

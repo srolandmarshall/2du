@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Modal, Form, Container, Row, Col, Button } from "react-bootstrap";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
-import ToDos from "./containers/ToDos.jsx";
+import ToDo from "./containers/ToDo.jsx";
 import NewToDoList from "./components/NewToDoList.jsx";
-import { saveAs } from "file-saver";
 
 library.add(faCheck, faTimes);
 
@@ -42,6 +41,7 @@ export function useLocalStorage(key, defaultValue) {
 
 function App() {
   const [showNewToDoForm, setShowNewToDoForm] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
   const [listId, setListId] = useLocalStorage("2du:listId", 0);
   const [ToDoList, setToDoList] = useLocalStorage("2du:toDos", []);
   const [file, setFile] = useState({});
@@ -91,13 +91,65 @@ function App() {
     };
   };
 
+  const clearToDoList = () => {
+    setShowClearModal(false);
+    setToDoList([]);
+  };
+  const handleClose = () => setShowClearModal(false);
+
   return (
     <div className="App">
       <Container>
+        <Modal show={showClearModal} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Clear To Dos?</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>This will clear all of your current to dos.</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={clearToDoList}>
+              That's OK!
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <Row className="padded">
-          <Col>
+          <Col className="padded" md={3}>
             <Button onClick={() => setShowNewToDoForm(true)}>
               New ToDo List
+            </Button>
+          </Col>
+          <Col className="padded" md={3}>
+            <Button onClick={exportAllToJSON} variant="success">
+              Export to JSON
+            </Button>
+          </Col>
+          <Col className="padded" md={3}>
+            <Row>
+              <Form>
+                <Form.File
+                  onChange={onUpload}
+                  onSubmit={onSubmit}
+                  id="import-json"
+                  label={file.name || "Import..."}
+                  custom
+                />
+              </Form>
+            </Row>
+            <Row>
+              <Col>
+                {file.name && (
+                  <Button className="padded" onClick={onSubmit}>
+                    Upload
+                  </Button>
+                )}
+              </Col>
+            </Row>
+          </Col>
+          <Col className="padded" md={3}>
+            <Button variant="danger" onClick={() => setShowClearModal(true)}>
+              Clear Everything
             </Button>
           </Col>
           {showNewToDoForm && (
@@ -109,18 +161,19 @@ function App() {
           )}
         </Row>
         <Row>
-          <ToDos toDoList={ToDoList} setListId={setListId} listId={listId} />
-        </Row>
-        <Row className="padded">
-          <Col>
-            <Button onClick={exportAllToJSON} variant="success">
-              Export to JSON
-            </Button>
-          </Col>
-          <Col>
-            <input type="file" onChange={onUpload} />
-            {file.name && <Button onClick={onSubmit}>Upload</Button>}
-          </Col>
+          {ToDoList.map((toDo) => {
+            return (
+              <Col className="padded" md={6}>
+                <ToDo
+                  listId={toDo.listId}
+                  key={toDo.listId}
+                  createdOn={toDo.createdOn}
+                  title={toDo.title}
+                  items={toDo.items}
+                />
+              </Col>
+            );
+          })}
         </Row>
       </Container>
     </div>
