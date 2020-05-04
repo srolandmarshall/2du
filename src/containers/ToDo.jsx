@@ -67,7 +67,7 @@ const ToDo = (props) => {
               size="sm"
               variant="outline-primary"
             >
-              Clear Checked Items
+              Clear Checked 2dus
             </Button>
           </Col>
         </Row>
@@ -92,7 +92,7 @@ const ToDo = (props) => {
           </>
         ) : (
           <Button className="add" variant="primary" onClick={toggleForm}>
-            Add To Do
+            Add 2du
           </Button>
         )}
       </Card.Body>
