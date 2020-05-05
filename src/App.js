@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./App.css";
 import ToDo from "./containers/ToDo.jsx";
 import NewToDoList from "./components/NewToDoList.jsx";
+import GitHub from "./components/GitHub.jsx";
 import Cookies from "js-cookie";
 
 const axios = require("axios").default;
@@ -68,7 +69,6 @@ function App() {
     const params = new URLSearchParams(queries);
     const code = params.get("code");
     if (code && !hasGithubToken) {
-      console.log(`Code ${code} present`);
       async function getToken() {
         try {
           const res = await axios.post(
@@ -77,12 +77,11 @@ function App() {
               client_id: process.env.REACT_APP_CLIENT_ID,
               client_secret: process.env.REACT_APP_CLIENT_SECRET,
               code: code,
+              scope: "gists",
             },
             { headers: { Accept: "application/json" } }
           );
-          console.log("response below");
-          console.log(res);
-          console.log(res.data);
+
           const parsed = queryString.parse(res.data);
           if (parsed.error) {
             throw "Bad OAuth Token";
@@ -232,18 +231,19 @@ function App() {
           })}
         </Row>
         <Row>
-          {!hasGithubToken && (
+          {!hasGithubToken ? (
             <a
-              href={`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=user&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}`}
+              href={`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=gist&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}`}
             >
               <Button variant="secondary">
                 <span className="padded">Log In with GitHub</span>
                 <FontAwesomeIcon icon={faGithub} />
               </Button>
             </a>
+          ) : (
+            <GitHub />
           )}
         </Row>
-        <Row>{hasGithubToken && <p>Logged in with GitHub!</p>}</Row>
       </Container>
     </div>
   );
