@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form, Container, Row, Col, Button } from "react-bootstrap";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { library, icon } from "@fortawesome/fontawesome-svg-core";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./App.css";
 import ToDo from "./containers/ToDo.jsx";
 import NewToDoList from "./components/NewToDoList.jsx";
 import GitHub from "./components/GitHub.jsx";
-import Cookies from "js-cookie";
-
-const axios = require("axios").default;
-const queryString = require("query-string");
 
 library.add(faCheck, faTimes, faGithub);
 
@@ -54,50 +49,17 @@ function App() {
   const [ToDoList, setToDoList] = useLocalStorage("2du:toDos", []);
   const [tempToDoList, setTempToDoList] = useState([]);
   const [file, setFile] = useState({});
-  const [hasGithubToken, setHasGitHubToken] = useState(
-    typeof Cookies.get("access_token") !== "undefined"
-  );
 
   const exportAllToJSON = () => {
-    const json = JSON.stringify(localStorage);
-    var blob = new Blob([json], { type: "application/json;charset=utf-8" });
-    FileSaver.saveAs(blob, "2du.json");
+    return JSON.stringify({ "2du": localStorage });
   };
 
-  useEffect(() => {
-    const queries = window.location.search;
-    const params = new URLSearchParams(queries);
-    const code = params.get("code");
-    if (code && !hasGithubToken) {
-      async function getToken() {
-        try {
-          const res = await axios.post(
-            `/oauth`,
-            {
-              client_id: process.env.REACT_APP_CLIENT_ID,
-              client_secret: process.env.REACT_APP_CLIENT_SECRET,
-              code: code,
-              scope: "gists",
-            },
-            { headers: { Accept: "application/json" } }
-          );
-
-          const parsed = queryString.parse(res.data);
-          if (parsed.error) {
-            throw "Bad OAuth Token";
-          } else {
-            for (let [key, value] of Object.entries(parsed)) {
-              Cookies.set(key, value);
-            }
-            setHasGitHubToken(true);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      getToken();
-    }
-  }, []);
+  const writeFile = () => {
+    var blob = new Blob([exportAllToJSON()], {
+      type: "application/json;charset=utf-8",
+    });
+    FileSaver.saveAs(blob, "2du.json");
+  };
 
   const createToDo = (title) => {
     const newList = {
@@ -125,24 +87,28 @@ function App() {
   const onSubmit = (e) => {
     let reader = new FileReader();
     reader.readAsText(file);
-    window.localStorage.clear();
     reader.onload = function () {
-      const objectVersion = JSON.parse(reader.result);
-      for (let [key, value] of Object.entries(objectVersion)) {
-        window.localStorage.setItem(key, value);
-      }
-      const toDos = JSON.parse(objectVersion["2du:toDos"]);
-      if (ToDoList.length > 0) {
-        setShowClearModal(true);
-        setTempToDoList(toDos);
+      const objectVersion = JSON.parse(reader.result)["2du"];
+      if (objectVersion) {
+        window.localStorage.clear();
+        for (let [key, value] of Object.entries(objectVersion)) {
+          window.localStorage.setItem(key, value);
+        }
+        const toDos = JSON.parse(objectVersion["2du:toDos"]);
+        if (ToDoList.length > 0) {
+          setShowClearModal(true);
+          setTempToDoList(toDos);
+        } else {
+          setToDoList(toDos);
+        }
       } else {
-        setToDoList(toDos);
+        //show an error that something went wrong
       }
+      setFile({});
     };
     reader.onerror = function () {
       console.log(reader.error);
     };
-    setFile({});
   };
 
   const replaceToDoList = (list) => {
@@ -176,7 +142,7 @@ function App() {
             </Button>
           </Col>
           <Col className="padded" md={3}>
-            <Button onClick={exportAllToJSON} variant="success">
+            <Button onClick={writeFile} variant="success">
               Export to JSON
             </Button>
           </Col>
@@ -231,18 +197,7 @@ function App() {
           })}
         </Row>
         <Row>
-          {!hasGithubToken ? (
-            <a
-              href={`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=gist&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}`}
-            >
-              <Button variant="secondary">
-                <span className="padded">Log In with GitHub</span>
-                <FontAwesomeIcon icon={faGithub} />
-              </Button>
-            </a>
-          ) : (
-            <GitHub />
-          )}
+          <GitHub exportAllToJSON={exportAllToJSON} />
         </Row>
       </Container>
     </div>

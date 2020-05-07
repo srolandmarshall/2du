@@ -1,17 +1,30 @@
-import React, { useState } from "react";
-import Select from "react-select";
+import React, { useState, useEffect } from "react";
+import { Button } from "react-bootstrap";
+
+import { useLocalStorage } from "../App.js";
 
 const DropDown = (props) => {
-  const { options } = props;
-
-  const [selectedOption, setSelectedOption] = useState(null);
-  const handleChange = (selectedOption) => {
-    setSelectedOption({ selectedOption }, () =>
-      console.log(`Option selected:`, selectedOption)
-    );
+  const { options, name, labelFunction, valueFunction, onChange } = props;
+  const [selectedOption, setSelectedOption] = useState(
+    valueFunction(options[0])
+  );
+  useEffect(() => {
+    onChange(selectedOption);
+  }, [selectedOption]);
+  const handleChange = (event) => {
+    const selected = event.target.value;
+    setSelectedOption(selected);
   };
   return (
-    <Select value={selectedOption} onChange={handleChange} options={options} />
+    <select onChange={handleChange} id={`${name}-picker`} name={name}>
+      {options.map((item, index) => {
+        return (
+          <option key={`${name}-option-${index}`} value={valueFunction(item)}>
+            {labelFunction(item)}
+          </option>
+        );
+      })}
+    </select>
   );
 };
 

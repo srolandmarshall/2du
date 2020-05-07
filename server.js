@@ -27,7 +27,25 @@ app.post("/gists", async (req, res) => {
   }
 });
 
+app.post("/new-gist", async (req, res) => {
+  const URL = `https://api.github.com/gists`;
+  try {
+    const resp = await axios.post(URL, req.body.gist, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${req.body.token}`,
+      },
+    });
+    res.json(resp.data);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 app.post("/oauth", async (req, res) => {
+  console.log("Attempting OAuth");
+
   const formData = req.body;
   const URL = `https://github.com/login/oauth/access_token?code=${formData.code}&scope=gist&client_id=${formData.client_id}&client_secret=${formData.client_secret}`;
   try {
@@ -36,6 +54,7 @@ app.post("/oauth", async (req, res) => {
         Accept: "application/json",
       },
     });
+    res.json(resp.data);
   } catch (error) {
     console.error(error);
   }
