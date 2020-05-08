@@ -1,35 +1,73 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row, Card, Button } from "react-bootstrap";
-import GistPicker from "./GistPicker";
 import Cookies from "js-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useLocalStorage } from "../App.js";
+import { useLocalStorage, token } from "../App.js";
 import useSessionstorage from "@rooks/use-sessionstorage";
+import NoGist from "./NoGist.jsx";
+import GistLoaded from "./GistLoaded.jsx";
+
+//TODO:
+// * Allow user to clear Gist
+// * Get all files from Gist
+// * Allow user to select file to load
+// * Create compatible file check
+// * Allow user to create new file from initialState (with title form)
+// * Allow user to create new file from current 2du state (with title form)
+// * Allow user to sync 2du/overwrite selected file (with warning)
+// * Create warning
 
 const queryString = require("query-string");
 const axios = require("axios").default;
 
 const GitHub = (props) => {
+  const { setShowClearModal, setTempToDoList, setToDoList, toDoList } = props;
   const [hasGithubToken, setHasGitHubToken] = useState(
     typeof Cookies.get("access_token") !== "undefined"
   );
-  const token = Cookies.get("access_token");
 
-  const [gists, setGists] = useLocalStorage("2du:gists", []);
-  const [selectedGist, setSelectedGist] = useState(gists[0]);
+  const [gists, setGists] = useSessionstorage("2du:gists", []);
+  const [selectedGist, setSelectedGist] = useState({});
   const [gist, setGist, removeGist] = useSessionstorage("2du:gist", {});
+  const [hasGist, setHasGist] = useState(false);
+  const [gistFile, setGistFile, removeGistFile] = useSessionstorage(
+    "2du:gist-file",
+    {}
+  );
+  const [gistFiles, setGistFiles] = useSessionstorage("2du:gist-files", {});
 
-  const { exportAllToJSON } = props;
-
-  const useSelectedGist = () => {
-    console.log(`Use this Gist: ${selectedGist}`);
-    debugger;
-    setGist(selectedGist);
+  const resetGist = () => {
+    setGist({});
+    setHasGist(false);
   };
 
-  const useLocalGistSelection = () => {
-    const gistId = window.localStorage.getItem("2du:selected-gist");
-    setSelectedGist(gists.find((gist) => gist.id === gistId));
+  const useGist = (gist) => {
+    setGist(gist);
+    setGistFiles(gist["files"]);
+    setHasGist(true);
+  };
+
+  const useGistFile = (file) => {
+    const content = file["content"];
+    const parsed = JSON.parse(content);
+    setGistFile(content);
+    debugger;
+    if (parsed["2du"]) {
+      window.localStorage.clear();
+      debugger;
+      for (let [key, value] of Object.entries(parsed["2du"])) {
+        window.localStorage.setItem(key, value);
+      }
+      const data = parsed["2du"];
+      const toDos = JSON.parse(data["2du:toDos"]);
+      debugger;
+      if (toDoList.length > 0) {
+        setShowClearModal(true);
+        setTempToDoList(toDos);
+      } else {
+        setToDoList(toDos);
+      }
+    }
   };
 
   useEffect(() => {
@@ -92,36 +130,7 @@ const GitHub = (props) => {
       }
     }
     getGists();
-  }, []);
-
-  const newGist = async () => {
-    const today = new Date();
-    const gistBody = {
-      description: "2du",
-      public: false,
-      files: {
-        [`${today.toJSON()}.json`]: {
-          content: exportAllToJSON(),
-        },
-      },
-    };
-    try {
-      const res = await axios.post(
-        `/new-gist`,
-        { token: token, gist: gistBody },
-        {
-          headers: { Accept: "application/json" },
-        }
-      );
-      if (res.error) {
-        throw res.error;
-      } else {
-        setGist(res.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  }, [hasGithubToken]);
 
   return (
     <>
@@ -139,23 +148,22 @@ const GitHub = (props) => {
           <Card.Header as="h5">Logged in via GitHub</Card.Header>
           <Card.Body>
             <Row>
-              <Col>
-                <Card.Title>Choose your 2du Gist</Card.Title>
-                <GistPicker
-                  setSelectedGist={setSelectedGist}
-                  gists={gists}
-                  className="padded"
+              {hasGist ? (
+                <GistLoaded
+                  reset={resetGist}
+                  useGistFile={useGistFile}
+                  gist={gist}
+                  gistFiles={gistFiles}
+                  setGistFiles={setGistFiles}
                 />
-                <Button variant="primary" onClick={useSelectedGist}>
-                  Use This Gist
-                </Button>
-              </Col>
-              <Col>Or...</Col>
-              <Col>
-                <Button variant="success" onClick={newGist}>
-                  Create New 2du Gist
-                </Button>
-              </Col>
+              ) : (
+                <NoGist
+                  gists={gists}
+                  useGist={useGist}
+                  selectedGist={selectedGist}
+                  setSelectedGist={setSelectedGist}
+                />
+              )}
             </Row>
           </Card.Body>
         </Card>

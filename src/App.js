@@ -3,6 +3,7 @@ import { Modal, Form, Container, Row, Col, Button } from "react-bootstrap";
 import { library, icon } from "@fortawesome/fontawesome-svg-core";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import Cookies from "js-cookie";
 
 import "./App.css";
 import ToDo from "./containers/ToDo.jsx";
@@ -42,6 +43,12 @@ export function useLocalStorage(key, defaultValue) {
   return [storedValue, setValue];
 }
 
+export const token = Cookies.get("access_token");
+
+export function exportAllToJSON() {
+  return JSON.stringify({ "2du": localStorage });
+}
+
 function App() {
   const [showNewToDoForm, setShowNewToDoForm] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
@@ -50,11 +57,7 @@ function App() {
   const [tempToDoList, setTempToDoList] = useState([]);
   const [file, setFile] = useState({});
 
-  const exportAllToJSON = () => {
-    return JSON.stringify({ "2du": localStorage });
-  };
-
-  const writeFile = () => {
+  const writeFile = (content) => {
     var blob = new Blob([exportAllToJSON()], {
       type: "application/json;charset=utf-8",
     });
@@ -84,19 +87,20 @@ function App() {
     setFile(saved);
   };
 
-  const onSubmit = (e) => {
+  const UseFile = (file) => {
     let reader = new FileReader();
+    debugger;
     reader.readAsText(file);
     reader.onload = function () {
       const objectVersion = JSON.parse(reader.result)["2du"];
       if (objectVersion) {
-        window.localStorage.clear();
-        for (let [key, value] of Object.entries(objectVersion)) {
-          window.localStorage.setItem(key, value);
-        }
         const toDos = JSON.parse(objectVersion["2du:toDos"]);
         if (ToDoList.length > 0) {
           setShowClearModal(true);
+          window.localStorage.clear();
+          for (let [key, value] of Object.entries(objectVersion)) {
+            window.localStorage.setItem(key, value);
+          }
           setTempToDoList(toDos);
         } else {
           setToDoList(toDos);
@@ -113,6 +117,7 @@ function App() {
 
   const replaceToDoList = (list) => {
     setShowClearModal(false);
+    window.localStorage.clear();
     setToDoList(tempToDoList);
     setTempToDoList([]);
   };
@@ -151,7 +156,7 @@ function App() {
               <Form>
                 <Form.File
                   onChange={onUpload}
-                  onSubmit={onSubmit}
+                  onSubmit={() => UseFile(file)}
                   id="import-json"
                   label={file.name || "Import..."}
                   custom
@@ -161,7 +166,7 @@ function App() {
             <Row>
               <Col>
                 {file.name && (
-                  <Button className="padded" onClick={onSubmit}>
+                  <Button className="padded" onClick={() => UseFile(file)}>
                     Upload JSON
                   </Button>
                 )}
@@ -197,7 +202,12 @@ function App() {
           })}
         </Row>
         <Row>
-          <GitHub exportAllToJSON={exportAllToJSON} />
+          <GitHub
+            setShowClearModal={setShowClearModal}
+            setTempToDoList={setTempToDoList}
+            setToDoList={setToDoList}
+            toDoList={ToDoList}
+          />
         </Row>
       </Container>
     </div>
