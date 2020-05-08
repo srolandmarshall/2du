@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row, Card, Button } from "react-bootstrap";
 import Cookies from "js-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useLocalStorage, token } from "../App.js";
+import { token } from "../App.js";
 import useSessionstorage from "@rooks/use-sessionstorage";
 import NoGist from "./NoGist.jsx";
 import GistLoaded from "./GistLoaded.jsx";
@@ -21,7 +21,14 @@ const queryString = require("query-string");
 const axios = require("axios").default;
 
 const GitHub = (props) => {
-  const { setShowClearModal, setTempToDoList, setToDoList, toDoList } = props;
+  const {
+    resetEverything,
+    overwriteLocalStorage,
+    setShowClearModal,
+    setTempToDoList,
+    setToDoList,
+    toDoList,
+  } = props;
   const [hasGithubToken, setHasGitHubToken] = useState(
     typeof Cookies.get("access_token") !== "undefined"
   );
@@ -60,10 +67,9 @@ const GitHub = (props) => {
       const data = parsed["2du"];
       const toDos = JSON.parse(data["2du:toDos"]);
       if (toDoList.length > 0) {
-        setShowClearModal(true);
-        setTempToDoList(toDos);
+        resetEverything(true, parsed);
       } else {
-        setToDoList(toDos);
+        overwriteLocalStorage(parsed);
       }
     }
   };

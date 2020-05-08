@@ -65,10 +65,13 @@ function App() {
   };
 
   const resetEverything = (withFile = false, file) => {
+    setShowClearModal(false);
     window.localStorage.clear();
-    setShowClearModal(true);
     if (withFile) {
       overwriteLocalStorage(file);
+      setToDoList(JSON.parse(file["2du"]["2du:toDos"]));
+    } else {
+      setToDoList([]);
     }
   };
 
@@ -101,9 +104,6 @@ function App() {
     }
     setFile(saved);
   };
-
-  //TODO: Refactor UseFile and Modal
-
   const UseFile = (file) => {
     let reader = new FileReader();
     reader.readAsText(file);
@@ -125,12 +125,9 @@ function App() {
     };
   };
 
-  const replaceToDoList = (list) => {
+  const handleClose = (bool) => {
     setShowClearModal(false);
-    setToDoList(tempToDoList);
-    setTempToDoList([]);
   };
-  const handleClose = () => setShowClearModal(false);
 
   return (
     <div className="App">
@@ -144,7 +141,7 @@ function App() {
             <Button variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={() => replaceToDoList([])}>
+            <Button variant="primary" onClick={resetEverything}>
               That's OK!
             </Button>
           </Modal.Footer>
@@ -212,6 +209,8 @@ function App() {
         </Row>
         <Row>
           <GitHub
+            overwriteLocalStorage={overwriteLocalStorage}
+            resetEverything={resetEverything}
             setShowClearModal={setShowClearModal}
             setTempToDoList={setTempToDoList}
             setToDoList={setToDoList}
