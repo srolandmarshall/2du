@@ -51,16 +51,14 @@ const GitHub = (props) => {
     const content = file["content"];
     const parsed = JSON.parse(content);
     setGistFile(content);
-    debugger;
     if (parsed["2du"]) {
       window.localStorage.clear();
-      debugger;
       for (let [key, value] of Object.entries(parsed["2du"])) {
         window.localStorage.setItem(key, value);
+        console.log(`Set ${key} to ${value}`);
       }
       const data = parsed["2du"];
       const toDos = JSON.parse(data["2du:toDos"]);
-      debugger;
       if (toDoList.length > 0) {
         setShowClearModal(true);
         setTempToDoList(toDos);

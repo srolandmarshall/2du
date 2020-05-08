@@ -57,6 +57,21 @@ function App() {
   const [tempToDoList, setTempToDoList] = useState([]);
   const [file, setFile] = useState({});
 
+  const overwriteLocalStorage = (file) => {
+    for (let [key, value] of Object.entries(file["2du"])) {
+      window.localStorage.setItem(key, value);
+    }
+    setToDoList(JSON.parse(file["2du"]["2du:toDos"]));
+  };
+
+  const resetEverything = (withFile = false, file) => {
+    window.localStorage.clear();
+    setShowClearModal(true);
+    if (withFile) {
+      overwriteLocalStorage(file);
+    }
+  };
+
   const writeFile = (content) => {
     var blob = new Blob([exportAllToJSON()], {
       type: "application/json;charset=utf-8",
@@ -87,23 +102,18 @@ function App() {
     setFile(saved);
   };
 
+  //TODO: Refactor UseFile and Modal
+
   const UseFile = (file) => {
     let reader = new FileReader();
-    debugger;
     reader.readAsText(file);
     reader.onload = function () {
-      const objectVersion = JSON.parse(reader.result)["2du"];
-      if (objectVersion) {
-        const toDos = JSON.parse(objectVersion["2du:toDos"]);
+      const file = JSON.parse(reader.result);
+      if (file["2du"]) {
         if (ToDoList.length > 0) {
-          setShowClearModal(true);
-          window.localStorage.clear();
-          for (let [key, value] of Object.entries(objectVersion)) {
-            window.localStorage.setItem(key, value);
-          }
-          setTempToDoList(toDos);
+          resetEverything(true, JSON.parse(reader.result));
         } else {
-          setToDoList(toDos);
+          overwriteLocalStorage(file);
         }
       } else {
         //show an error that something went wrong
@@ -117,7 +127,6 @@ function App() {
 
   const replaceToDoList = (list) => {
     setShowClearModal(false);
-    window.localStorage.clear();
     setToDoList(tempToDoList);
     setTempToDoList([]);
   };
@@ -174,7 +183,7 @@ function App() {
             </Row>
           </Col>
           <Col className="padded" md={3}>
-            <Button variant="danger" onClick={() => setShowClearModal(true)}>
+            <Button variant="danger" onClick={() => resetEverything(false)}>
               Clear Everything
             </Button>
           </Col>
